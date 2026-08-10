@@ -702,16 +702,22 @@
 
 // ══════════════════════════════════════════════
 //  CONFIGURATION
-//  Set DATA_ENDPOINT to auto-submit data to a server.
-//  Options:
-//    • JATOS:     use jatos.js + jatos.submitResultData() instead of fetch
-//    • Supabase:  "https://<project>.supabase.co/rest/v1/<table>"
-//                 (add apikey/Authorization headers in saveData())
-//    • Google Sheets via Apps Script deployed as Web App:
-//                 "https://script.google.com/macros/s/<ID>/exec"
-//  Leave null to rely on localStorage + the auto-downloaded JSON file.
 // ══════════════════════════════════════════════
-const DATA_ENDPOINT       = null;
+
+// ── Legacy generic endpoint (unused if Supabase is configured) ──
+//  Set to a URL if using Google Apps Script or a custom backend.
+//  Leave null if using Supabase below.
+const DATA_ENDPOINT = null;
+
+// ── Supabase ──────────────────────────────────
+//  The anon key is safe to be public — it is designed for browser use.
+//  RLS policies in Supabase restrict it to INSERT + UPDATE only,
+//  so participants can submit data but cannot read other rows.
+//  Set both values to enable automatic cloud saving.
+//  Leave SUPABASE_URL as null to disable (local download only).
+const SUPABASE_URL = "https://qgsgbuhqpcozpyfzytht.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnc2didWhxcGNvenB5Znp5dGh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzNjEwODIsImV4cCI6MjEwMTkzNzA4Mn0.oWVlLEv4ug9_pb3ClS4FM3Wi98JiEPOyyupwk4qGj6Y";   // anon public key
+const SUPABASE_TABLE = "results";
 
 const MAX_SEARCH_TIME      = 12000; // ms before timeout
 const TIMEOUT_MSG_DURATION = 2500;  // ms to show timeout screen
@@ -833,11 +839,32 @@ document.addEventListener("keydown", e => {
   handleSpaceAbsent();
 });
 
-// On tab close: persist to localStorage + beacon to server if configured
+// On tab close: persist to localStorage + best-effort beacon to Supabase.
+// sendBeacon is fire-and-forget — the browser sends it even as the page unloads.
+// This is the last-resort partial save for participants who close mid-session.
 window.addEventListener("beforeunload", () => {
   localStorage.setItem("camo_partial", JSON.stringify(report));
+
   if (DATA_ENDPOINT) {
     navigator.sendBeacon(DATA_ENDPOINT, JSON.stringify(report));
+  }
+
+  if (SUPABASE_URL && SUPABASE_KEY && report.trials.length > 0) {
+    const payload = JSON.stringify({
+      participant_id: report.participant_id,
+      start_time:     report.start_time,
+      end_time:       null,
+      demographics:   report.demographics,
+      trials:         report.trials,
+      n_trials:       report.trials.length,
+      completed:      false
+    });
+    // sendBeacon doesn't support custom headers, so we use the REST URL with
+    // the apikey as a query parameter (Supabase supports this for beacons).
+    navigator.sendBeacon(
+      `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?apikey=${SUPABASE_KEY}`,
+      new Blob([payload], { type: "application/json" })
+    );
   }
 });
 
@@ -1300,6 +1327,7 @@ function endTrial(data) {
   });
 
   saveData();
+  saveToSupabase();
   drawMaskOutline();
 
   // Draw feedback symbol/text on top of mask layers
@@ -1349,7 +1377,8 @@ function handleTimeout() {
     trajectory:             ENABLE_TRAJECTORY ? currentTrajectory : null
   });
 
-  saveData(); // FIX: was missing
+  saveData();       // saves to localStorage
+  saveToSupabase(); // saves to Supabase
 
   const overlay = document.getElementById("timeoutOverlay");
   overlay.style.display = "flex";
@@ -1494,18 +1523,55 @@ function showCenteredText(text) {
 //  DATA SAVING
 // ══════════════════════════════════════════════
 
+// ── Local save (always runs) ──
+//  Writes the full report to localStorage after every trial.
+//  Acts as a fallback if Supabase is unreachable or not configured.
+//  Also calls a generic DATA_ENDPOINT if one is set (e.g. Google Sheets).
 function saveData() {
-  // Always save locally (fallback)
   localStorage.setItem("camo_partial", JSON.stringify(report));
 
-  // Send to server endpoint if configured
   if (DATA_ENDPOINT) {
     fetch(DATA_ENDPOINT, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(report)
-    }).catch(() => {/* silent — partial data is still in localStorage */});
+    }).catch(() => {/* silent — data is still in localStorage */});
   }
+}
+
+// ── Supabase save (runs alongside saveData) ──
+//  Upserts the current report state into the Supabase `results` table.
+//  Because it is called after every trial, partial sessions are preserved
+//  automatically — if a participant closes mid-way you still have their data.
+//
+//  Upsert behaviour (INSERT first time, UPDATE on subsequent calls) requires:
+//    • participant_id column has a UNIQUE constraint in Supabase
+//    • RLS policies allow INSERT and UPDATE for the anon role
+//  See the SQL setup instructions in the README / setup guide.
+function saveToSupabase() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return;
+
+  const payload = {
+    participant_id: report.participant_id,
+    start_time:     report.start_time,
+    end_time:       report.end_time ?? null,
+    demographics:   report.demographics,
+    trials:         report.trials,           // stored as jsonb in Supabase
+    n_trials:       report.trials.length,    // handy for a quick glance in the dashboard
+    completed:      report.end_time != null  // false for partial sessions
+  };
+
+  fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+    method:  "POST",
+    headers: {
+      "Content-Type":  "application/json",
+      "apikey":        SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      // merge-duplicates = upsert: INSERT on first call, UPDATE on subsequent calls
+      "Prefer":        "resolution=merge-duplicates"
+    },
+    body: JSON.stringify(payload)
+  }).catch(() => {/* silent — saveData() already wrote to localStorage */});
 }
 
 
@@ -1518,7 +1584,8 @@ function finishExperiment() {
   experimentFinished    = true;
   report.end_time       = new Date().toISOString();
 
-  saveData(); // Final save — includes end_time
+  saveData();       // Final local save — includes end_time
+  saveToSupabase(); // Final Supabase save — marks completed: true
 
   showScreen("thankyou");
 
