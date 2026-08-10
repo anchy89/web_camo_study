@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camouflage Perception Study</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:          #0c0c0f;
+      --surface:     #141417;
+      --surface2:    #1c1c21;
+      --border:      rgba(255,255,255,0.07);
+      --border2:     rgba(255,255,255,0.12);
+      --text:        #dddde6;
+      --muted:       #7a7a88;
+      --accent:      #4b9eff;
+      --accent-dim:  rgba(75,158,255,0.12);
+      --green:       #30c97a;
+      --red:         #e05252;
+      --radius:      14px;
+      --font:        'Outfit', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    /* ────────────────── SCREENS ────────────────── */
+    .screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      justify-content: center;
+      align-items: center;
+    }
+    .screen.active { display: flex; }
+
+
+    /* ────────────────── DEVICE WARNING ────────────────── */
+    #device-warning {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      padding: 40px;
+    }
+    .device-icon { font-size: 64px; }
+    #device-warning h1 { font-size: 32px; font-weight: 700; }
+    #device-warning p {
+      color: var(--muted);
+      font-size: 20px;
+      max-width: 440px;
+      line-height: 1.7;
+    }
+    .device-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 17px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+
+    /* ────────────────── CONSENT ────────────────── */
+    #consent { padding: 24px; overflow-y: auto; }
+
+    .consent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 44px 52px;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .study-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 13px;
+      border-radius: 20px;
+      margin-bottom: 22px;
+    }
+
+    .consent-card h1 {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .consent-card .subtitle {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 45px;
+    }
+
+    .rule-list {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 0;
+      margin-bottom: 24px;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      padding: 13px 18px;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    .rule-item + .rule-item { border-top: 1px solid var(--border); }
+    .rule-list + .rule-list { margin-top: 15px; }
+    .rule-icon { font-size: 21px; flex-shrink: 0; margin-top: 1px; }
+
+    .consent-note {
+      font-size: 16px;
+      color: var(--muted);
+      margin-top: 45px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+
+    /* ────────────────── DEMOGRAPHICS ────────────────── */
+    #demographics { padding: 24px; overflow-y: auto; }
+
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 40px 48px;
+      max-width: 520px;
+      width: 100%;
+    }
+
+    .demo-card h2 {
+      font-size: 27px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .demo-sub {
+      color: var(--muted);
+      font-size: 17px;
+      margin-bottom: 28px;
+    }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+
+    .form-field select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--surface2);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%237a7a88' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 18px;
+      padding: 10px 32px 10px 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .form-field select:hover { border-color: rgba(255,255,255,0.2); }
+
+    .form-field select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background-color: #1f1f26;
+    }
+
+    .form-full { grid-column: 1 / -1; }
+
+    .form-divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+
+    /* ────────────────── BUTTONS ────────────────── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 19px;
+      font-weight: 600;
+      padding: 13px 26px;
+      transition: opacity 0.15s, transform 0.1s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover  { opacity: 0.85; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); opacity: 1; }
+
+
+    /* ────────────────── LOADING ────────────────── */
+    #loading { flex-direction: column; gap: 18px; text-align: center; }
+    #loading p { color: var(--muted); font-size: 18px; }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+
+    /* ────────────────── ERROR ────────────────── */
+    #error-screen {
+      flex-direction: column;
+      gap: 14px;
+      text-align: center;
+      padding: 40px;
+    }
+    #error-screen h2 { font-size: 27px; }
+    #error-screen p  { color: var(--muted); font-size: 18px; max-width: 420px; line-height: 1.65; }
+    #error-detail {
+      font-size: 16px;
+      color: var(--red);
+      background: rgba(224,82,82,0.08);
+      border: 1px solid rgba(224,82,82,0.18);
+      border-radius: 8px;
+      padding: 10px 16px;
+      max-width: 500px;
+      font-family: monospace;
+    }
+
+
+    /* ────────────────── EXPERIMENT ────────────────── */
+    #experiment { flex-direction: column; }
+
+    /* Stimulus lives in normal flow, canvas is absolutely positioned over it */
+    #stimulus {
+      display: none;
+      /*
+        Consistent physical size across screens:
+        - Cap at 860 × 680 CSS px (logical pixels — device-independent)
+        - Shrink gracefully on small viewports via vw/vh
+        - CSS pixels account for OS/browser scaling, so 860px looks
+          roughly the same on 1080p, 1440p, and scaled 4K displays.
+      */
+      max-width:  clamp(480px, 74vw, 860px);
+      max-height: clamp(360px, 68vh, 680px);
+      width: auto;
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
+      position: relative; /* establishes context for offsetLeft/Top */
+    }
+
+    #overlay {
+      position: fixed; /* positioned via JS to align with #stimulus */
+      top: 0; left: 0;
+      pointer-events: none;
+    }
+
+
+    /* ────────────────── START CIRCLE ────────────────── */
+    #startContainer {
+      position: fixed;
+      /* sits 24 px below the image, which is vertically centred at 50 vh with
+         max-height clamp(360px, 68vh, 680px) → half = clamp(180px, 34vh, 340px).
+         syncOverlay() fine-tunes this once the real image dimensions are known. */
+      top: calc(50vh + clamp(180px, 34vh, 340px) + 24px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+
+    #instruction {
+      font-size: 20px;
+      color: var(--muted);
+    }
+
+    #startCircle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: #28282e;
+      border: 2px solid rgba(255,255,255,0.1);
+      cursor: crosshair;
+      transition: background 1.8s, border-color 0.25s, box-shadow 0.25s;
+    }
+
+    #startCircle.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 22px rgba(75,158,255,0.4);
+    }
+
+
+    /* ────────────────── PROGRESS ────────────────── */
+    #progressWrapper {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(280px, 38vw, 460px);
+      text-align: center;
+      display: none;
+      z-index: 100;
+    }
+
+    #progressLabel {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    #progressTrack {
+      width: 100%; height: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    #progressPractice {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    #progressReal {
+      height: 100%;
+      background: var(--green);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    #progressText {
+      font-size: 15px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── Legend dots ── */
+    #progressLegend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+
+
+    /* ────────────────── RESPONSE HINT ────────────────── */
+    #responseInstruction {
+      position: fixed;
+      bottom: 18px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 18px;
+      color: var(--muted);
+      display: none;
+      pointer-events: none;
+      letter-spacing: 0.02em;
+    }
+
+    kbd {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 5px;
+      padding: 1px 7px;
+      font-family: monospace;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+
+    /* ────────────────── BLACKOUT & OVERLAYS ────────────────── */
+    #blackout {
+      position: fixed; inset: 0;
+      background: #000;
+      display: none;
+      z-index: 999;
+    }
+
+    #timeoutOverlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.94);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      z-index: 2000;
+    }
+
+    .timeout-icon { font-size: 46px; }
+    .timeout-text { font-size: 27px; color: var(--muted); }
+
+
+    /* ────────────────── THANK YOU ────────────────── */
+    #thankyou { padding: 24px; }
+
+    .ty-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 48px 52px;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .ty-icon { font-size: 54px; margin-bottom: 14px; }
+
+    .ty-card h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .ty-card p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ DEVICE WARNING ════════════════ -->
+<div id="device-warning" class="screen">
+  <div class="device-icon">🖥️</div>
+  <h1>Desktop &amp; Mouse Required</h1>
+  <p>
+    This experiment requires a <strong>computer or laptop with a mouse</strong>.
+    It cannot be completed on a smartphone or tablet.<br><br>
+    Please re-open this page on a desktop device to participate.
+  </p>
+  <div class="device-note">📧 Share the link with yourself and open it on a computer</div>
+</div>
+
+<!-- ════════════════ CONSENT ════════════════ -->
+<div id="consent" class="screen">
+  <div class="consent-card">
+    <div class="study-tag">Research Study</div>
+    <h1>Camouflage Perception Study</h1>
+    <p class="subtitle">Measuring how quickly people detect camouflaged objects in forest scenes</p>
+
+    <div class="rule-list">
+      <div class="rule-item">
+        <span class="rule-icon">🎯</span>
+        <span>Images may contain a camouflaged object that looks like a rock — <u>click</u> as quickly and accurately as possible where you think it is.</span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-icon">⌨️</span>
+        <span>Press <kbd>Space</kbd> if you believe <u>no target</u> is present in the image.</span>
+      </div>
+    </div>
+    <div class="rule-list">
+      <div class="rule-item">
+        <span class="rule-icon">⏱️</span>
+        <span>Each trial has a time limit of 12 seconds — respond as fast as you can without sacrificing accuracy.</span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-icon">⌛</span>
+        <span>There will be 5 practice images followed by actual study images. The whole test takes between 5 and 10 minutes.</span>
+      </div>
+    </div>
+    <div class="rule-list">
+      <div class="rule-item">
+        <span class="rule-icon">🖱️</span>
+        <span>Requires a computer with a mouse — do not use a trackpad if possible.</span>
+      </div>
+    </div>
+
+    <p class="consent-note">🔒 Your responses are anonymous and will only be used for research purposes.</p>
+    <button class="btn btn-primary" onclick="showDemographics()">Agree &amp; Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════ DEMOGRAPHICS ════════════════ -->
+<div id="demographics" class="screen">
+  <div class="demo-card">
+    <h2>About You</h2>
+    <p class="demo-sub">A few quick questions — takes under a minute.</p>
+
+    <div class="form-grid">
+
+      <div class="form-field">
+        <label>Age range</label>
+        <select id="age">
+          <option value="18-25">18 – 25</option>
+          <option value="26-35">26 – 35</option>
+          <option value="36-50">36 – 50</option>
+          <option value="50+">50+</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Sex</label>
+        <select id="sex">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="other">Other</option>
+          <option value="prefer_not">Prefer not to say</option>
+        </select>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-field">
+        <label>Color blindness?</label>
+        <select id="colorblind">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Motor impairment?</label>
+        <select id="motor">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-field form-full">
+        <label>First time doing this test?</label>
+        <select id="first_time">
+          <option value="yes">Yes, this is my first time</option>
+          <option value="no">No, I have done it before</option>
+        </select>
+      </div>
+
+      <div class="form-full">
+        <button class="btn btn-primary" onclick="startFromDemographics()">Start Experiment →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ PHASE BREAK ════════════════ -->
+<div id="phase-break" class="screen">
+  <div class="consent-card" style="text-align:center">
+    
+    <h1>Practice Complete</h1>
+    <p style="color:var(--muted);font-size:18px;line-height:1.7;margin-bottom:28px">
+      You have finished the practice round.<br><br>
+      The real experiment will now begin. Respond as quickly and accurately as you can.
+    </p>
+    <button class="btn btn-primary" onclick="resumeAfterBreak()">Begin Experiment →</button>
+  </div>
+</div>
+
+<!-- ════════════════ LOADING ════════════════ -->
+<div id="loading" class="screen">
+  <div class="spinner"></div>
+  <p>Loading stimuli…</p>
+</div>
+
+<!-- ════════════════ ERROR ════════════════ -->
+<div id="error-screen" class="screen">
+  <h2>⚠️ Could Not Load</h2>
+  <p>The experiment failed to load its image sets. Make sure the <code>assets/</code> folder is present alongside this file and try refreshing.</p>
+  <div id="error-detail"></div>
+</div>
+
+<!-- ════════════════ EXPERIMENT ════════════════ -->
+<div id="experiment" class="screen">
+
+  <div id="progressWrapper">
+    <div id="progressLabel">Progress</div>
+    <div id="progressTrack">
+      <div id="progressPractice"></div>
+      <div id="progressReal"></div>
+    </div>
+    <div id="progressText"></div>
+    <div id="progressLegend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--accent)"></div> Practice
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--green)"></div> Experiment
+      </div>
+    </div>
+  </div>
+
+  <img id="stimulus" draggable="false" alt="">
+  <canvas id="overlay"></canvas>
+
+  <div id="startContainer">
+    <div id="instruction">Move your cursor to the circle below</div>
+    <div id="startCircle"></div>
+  </div>
+
+  <div id="responseInstruction">
+    Click the target &nbsp;·&nbsp; Press <kbd>Space</kbd> if absent
+  </div>
+
+</div>
+
+<!-- ════════════════ THANK YOU ════════════════ -->
+<div id="thankyou" class="screen">
+  <div class="ty-card">
+    <div class="ty-icon">✅</div>
+    <h1>Thank you!</h1>
+    <p>
+      Your participation is greatly appreciated.<br><br>
+      Your results file has been downloaded automatically.
+      If it didn't download, please let the researcher know.
+    </p>
+  </div>
+</div>
+
+<!-- Overlays (outside screen flow) -->
+<div id="blackout"></div>
+<div id="timeoutOverlay">
+  <div class="timeout-icon">⏰</div>
+  <div class="timeout-text">Time limit reached</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════════════ -->
+<script>
+"use strict";
+
+// ══════════════════════════════════════════════
+//  CONFIGURATION
+//  Set DATA_ENDPOINT to auto-submit data to a server.
+//  Options:
+//    • JATOS:     use jatos.js + jatos.submitResultData() instead of fetch
+//    • Supabase:  "https://<project>.supabase.co/rest/v1/<table>"
+//                 (add apikey/Authorization headers in saveData())
+//    • Google Sheets via Apps Script deployed as Web App:
+//                 "https://script.google.com/macros/s/<ID>/exec"
+//  Leave null to rely on localStorage + the auto-downloaded JSON file.
+// ══════════════════════════════════════════════
+const DATA_ENDPOINT       = null;
+
+const MAX_SEARCH_TIME      = 12000; // ms before timeout
+const TIMEOUT_MSG_DURATION = 2500;  // ms to show timeout screen
+const ENABLE_TRAJECTORY    = true;
+const TRAJECTORY_SAMPLE_MS = 45;
+const ABSENCE_KEY          = "Space";
+const ABSENCE_ENABLE_DELAY = 500;   // ms after stimulus before Space is accepted
+const MASK_THRESHOLD       = 200;   // R-channel value above which a pixel is "in mask"
+const NEAR_MISS_RADIUS_PX  = 20;    // mask-image pixels within which a click is a near-miss
+const MASK_TOP_MARGIN      = 30;    // top rows of mask image ignored (target never there)
+const SHOW_PHASE_BREAK     = true;  // set to false to skip the between-phases screen
+
+
+// ══════════════════════════════════════════════
+//  DEVICE CHECK
+// ══════════════════════════════════════════════
+
+function checkDevice() {
+  const noFinePointer = !window.matchMedia("(pointer: fine)").matches;
+  const isMobileUA    = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (noFinePointer || isMobileUA) {
+    showScreen("device-warning");
+    return false;
+  }
+  return true;
+}
+
+
+// ══════════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ══════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+
+let phases            = [];
+let phaseIndex        = 0;
+let trialIndex        = 0;
+
+let hoverTimer        = null;
+let stimulusStartTime = null;
+let experimentFinished = false;
+
+let currentCentroid    = null;  // centroid of the mask in mask-pixel coords
+let maskFillCanvas     = null;  // pre-rendered semi-transparent fill of the full mask area
+let maskOutlineCanvas  = null;  // pre-rendered outline canvas (offscreen)
+let maskNearMissCanvas = null;  // pre-rendered near-miss zone canvas (offscreen)
+let maskBoundaryPixels = [];    // boundary pixel coords [{x,y}…] for nearest-pixel search
+
+let timeoutTimer      = null;
+let trajectoryTimer   = null;
+let currentTrajectory = [];
+let lastMouseX        = 0;
+let lastMouseY        = 0;
+let spaceEnabled      = false;
+let trialActive       = false;
+let showingFeedback   = false;  // true only during post-response feedback window
+
+
+// ══════════════════════════════════════════════
+//  REPORT OBJECT
+// ══════════════════════════════════════════════
+
+const report = {
+  participant_id: crypto.randomUUID(),
+  start_time:     new Date().toISOString(),
+  end_time:       null,
+  demographics:   {},
+  trajectory_format: {
+    structure:         "[t, x, y]",
+    time_unit:         "ms since stimulus onset",
+    coordinate_scale:  10000   // multiply by 10000 to get normalised [0,1] coords
+  },
+  trials: []
+};
+
+
+// ══════════════════════════════════════════════
+//  DOM REFERENCES
+// ══════════════════════════════════════════════
+
+const startCircle          = document.getElementById("startCircle");
+const startContainer       = document.getElementById("startContainer");
+const instructionEl        = document.getElementById("instruction");
+const stimulus             = document.getElementById("stimulus");
+const overlay              = document.getElementById("overlay");
+const ctx                  = overlay.getContext("2d");
+const maskCanvas           = document.createElement("canvas");
+const maskCtx              = maskCanvas.getContext("2d");
+const responseInstruction  = document.getElementById("responseInstruction");
+const progressWrapper      = document.getElementById("progressWrapper");
+const progressPracticeEl   = document.getElementById("progressPractice");
+const progressRealEl       = document.getElementById("progressReal");
+const progressTextEl       = document.getElementById("progressText");
+
+
+// ══════════════════════════════════════════════
+//  INPUT EVENTS
+// ══════════════════════════════════════════════
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+document.addEventListener("mousemove", e => {
+  lastMouseX = e.clientX;
+  lastMouseY = e.clientY;
+});
+
+document.addEventListener("keydown", e => {
+  if (!trialActive || !spaceEnabled) return;
+  if (e.code !== ABSENCE_KEY) return;
+  e.preventDefault();
+  handleSpaceAbsent();
+});
+
+// On tab close: persist to localStorage + beacon to server if configured
+window.addEventListener("beforeunload", () => {
+  localStorage.setItem("camo_partial", JSON.stringify(report));
+  if (DATA_ENDPOINT) {
+    navigator.sendBeacon(DATA_ENDPOINT, JSON.stringify(report));
+  }
+});
+
+
+// ══════════════════════════════════════════════
+//  NAVIGATION HELPERS
+// ══════════════════════════════════════════════
+
+function showDemographics() {
+  showScreen("demographics");
+}
+
+function startFromDemographics() {
+  report.demographics = {
+    age:        document.getElementById("age").value,
+    sex:        document.getElementById("sex").value,
+    colorblind: document.getElementById("colorblind").value,
+    motor:      document.getElementById("motor").value,
+    first_time: document.getElementById("first_time").value
+  };
+  showScreen("loading");
+  startExperiment();
+}
+
+
+// ══════════════════════════════════════════════
+//  TRIAL LOADING
+//  FIX: noTarget parameter now used — no-target trials get mask: null
+//       so Space responses are correctly scored as hits.
+// ══════════════════════════════════════════════
+
+async function loadTrials(folder, phaseName, noTarget = false) {
+  const res = await fetch(folder + "/images.json");
+  if (!res.ok) throw new Error(`Cannot load ${folder}/images.json (HTTP ${res.status})`);
+  const list = await res.json();
+
+  return list.images.map(id => ({
+    folder,
+    id,
+    img:      folder + "/" + id + ".webp",
+    mask:     noTarget ? null : folder + "/" + id + "-mask.webp",
+    phase:    phaseName,
+    noTarget
+  }));
+}
+
+async function initTrials() {
+  const practice = await loadTrials("assets/test",      "practice");
+  const filter   = await loadTrials("assets/filter",    "real");
+  const noFilter = await loadTrials("assets/no_filter", "real");
+  const noTarget = await loadTrials("assets/no_target", "real", true);
+  const allReal  = [...filter, ...noFilter, ...noTarget];
+
+  // No two consecutive trials with the same base string (same scene, different filter),
+  // and no two consecutive no_target catch trials.
+  const keyFn    = t => t.noTarget ? '__no_target__' : baseName(t.id);
+  const realTrials = shuffleNoAdjacent(allReal, keyFn);
+
+  phases = [
+    { name: "practice", trials: practice },
+    { name: "real",     trials: realTrials }
+  ];
+}
+
+// Fisher-Yates shuffle (unbiased)
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Returns the part of an image ID before 'MCT-HgCdTe' (trailing _ stripped).
+// Used to identify same-scene pairs across filter/no_filter folders.
+function baseName(id) {
+  const i = id.indexOf('MCT-HgCdTe');
+  return i >= 0 ? id.slice(0, i).replace(/_+$/, '') : id;
+}
+
+// Shuffle arr so no two adjacent items share the same keyFn value.
+// Picks uniformly at random among eligible groups, but falls back to the
+// "forced" group (size > remaining/2) when skipping it would make the
+// constraint unsatisfiable. This avoids the old bias where the largest
+// group (no_target) was always placed first.
+function shuffleNoAdjacent(arr, keyFn) {
+  const groups = new Map();
+  for (const item of arr) {
+    const k = keyFn(item);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(item);
+  }
+  for (const g of groups.values()) shuffle(g);
+
+  const result = [];
+  let lastKey = null;
+
+  while (groups.size > 0) {
+    const remaining = arr.length - result.length;
+    const forced = [];
+    const free   = [];
+    for (const [k, g] of groups) {
+      if (k === lastKey) continue;
+      if (g.length > remaining / 2) forced.push(k);
+      else free.push(k);
+    }
+    const candidates = forced.length > 0 ? forced : free;
+    if (candidates.length === 0) {
+      console.warn('shuffleNoAdjacent: constraint unsatisfiable, appending remaining items');
+      for (const [, g] of groups) result.push(...g);
+      break;
+    }
+    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+    const g = groups.get(chosen);
+    result.push(g.pop());
+    if (g.length === 0) groups.delete(chosen);
+    lastKey = chosen;
+  }
+
+  return result;
+}
+
+
+// ══════════════════════════════════════════════
+//  START EXPERIMENT
+// ══════════════════════════════════════════════
+
+async function startExperiment() {
+  try {
+    await initTrials();
+  } catch (err) {
+    document.getElementById("error-detail").textContent = String(err);
+    showScreen("error-screen");
+    return;
+  }
+
+  phaseIndex = 0;
+  trialIndex = 0;
+  showScreen("experiment");
+  progressWrapper.style.display = "block";
+  updateProgressBar();
+}
+
+
+// ══════════════════════════════════════════════
+//  START CIRCLE
+// ══════════════════════════════════════════════
+
+startCircle.addEventListener("mouseenter", () => {
+  startCircle.classList.add("active");
+  hoverTimer = setTimeout(showStimulus, 1000);
+});
+
+startCircle.addEventListener("mouseleave", () => {
+  startCircle.classList.remove("active");
+  clearTimeout(hoverTimer);
+});
+
+
+// ══════════════════════════════════════════════
+//  SHOW STIMULUS
+//  FIX: race condition — clear old centroid immediately, wait for BOTH
+//       stimulus + mask to finish loading before enabling click.
+//       Previously, if stimulus loaded from cache before the mask network
+//       request completed, a fast click would test against the PREVIOUS
+//       trial's centroid/mask.
+// ══════════════════════════════════════════════
+
+async function showStimulus() {
+
+  startCircle.style.display      = "none";
+  instructionEl.style.display    = "none";
+  progressWrapper.style.display  = "none";
+
+  // Immediately clear state from previous trial
+  showingFeedback    = false;
+  currentCentroid    = null;
+  maskFillCanvas     = null;
+  maskOutlineCanvas  = null;
+  maskNearMissCanvas = null;
+  maskBoundaryPixels = [];
+  maskCanvas.width   = 0;
+
+  const trial = phases[phaseIndex].trials[trialIndex];
+
+  // Load stimulus image
+  const stimulusLoaded = new Promise((resolve, reject) => {
+    stimulus.onerror = () => reject(new Error("Stimulus failed to load"));
+    stimulus.onload  = resolve;
+    stimulus.src     = trial.img;
+    stimulus.style.display = "block";
+  });
+
+  // Load mask (returns Promise; resolves immediately if no mask)
+  const maskLoaded = trial.mask ? loadMask(trial.mask) : Promise.resolve();
+
+  try {
+    await Promise.all([stimulusLoaded, maskLoaded]);
+  } catch (err) {
+    console.warn("Asset load warning:", err);
+    // Proceed anyway — centroid will be null and hits will fail gracefully
+  }
+
+  // If a mask was expected but has no white pixels, treat as no-target at runtime.
+  // Catches images placed in a target folder whose mask is completely empty.
+  if (!trial.noTarget && trial.mask && currentCentroid === null) {
+    trial.noTarget = true;
+  }
+
+  // Size overlay canvas to exactly match stimulus on screen
+  syncOverlay();
+
+  responseInstruction.style.display = "block";
+
+  requestAnimationFrame(() => {
+    stimulusStartTime = performance.now();
+    trialActive  = true;
+    spaceEnabled = false;
+    enableClick();
+    setTimeout(() => { spaceEnabled = true; }, ABSENCE_ENABLE_DELAY);
+  });
+
+  timeoutTimer = setTimeout(handleTimeout, MAX_SEARCH_TIME);
+  startTrajectoryRecording();
+}
+
+
+// ══════════════════════════════════════════════
+//  MASK — load + compute centroid + pre-render outline
+//  Returns a Promise that resolves when fully processed.
+//  FIX: outline is pre-rendered once at load time (O(pixels)) so that
+//       drawMaskOutline() is a fast O(1) blit — was re-running the
+//       pixel loop on every trial end.
+// ══════════════════════════════════════════════
+
+function loadMask(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onerror = resolve; // fail gracefully
+    img.onload  = () => {
+      maskCanvas.width  = img.width;
+      maskCanvas.height = img.height;
+      maskCtx.clearRect(0, 0, img.width, img.height);
+      maskCtx.drawImage(img, 0, 0);
+
+      const data = maskCtx.getImageData(0, 0, img.width, img.height).data;
+
+      // ── Compute centroid ──
+      let sumX = 0, sumY = 0, count = 0;
+      for (let y = 0; y < img.height; y++) {
+        for (let x = 0; x < img.width; x++) {
+          const i = (y * img.width + x) * 4;
+          if (data[i] > MASK_THRESHOLD) { sumX += x; sumY += y; count++; }
+        }
+      }
+      currentCentroid = count > 0 ? { x: sumX / count, y: sumY / count } : null;
+
+      // ── Pre-render edge outline into an offscreen canvas ──
+      precomputeMaskOutline(data, img.width, img.height);
+
+      resolve();
+    };
+    img.src = src;
+  });
+}
+
+function precomputeMaskOutline(data, w, h) {
+  const edgePixels = [];
+
+  for (let y = Math.max(1, MASK_TOP_MARGIN); y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = (y * w + x) * 4;
+      if (data[i] <= MASK_THRESHOLD) continue;
+      const isEdge = [
+        ((y-1)*w +  x   ) * 4,
+        ((y+1)*w +  x   ) * 4,
+        ( y   *w + (x-1)) * 4,
+        ( y   *w + (x+1)) * 4
+      ].some(n => data[n] <= MASK_THRESHOLD);
+      if (isEdge) edgePixels.push({ x, y });
+    }
+  }
+
+  maskBoundaryPixels = edgePixels;
+
+  // ── Full mask fill (blue, semi-transparent) ──
+  const fillData = new Uint8ClampedArray(w * h * 4);
+  for (let i = 0; i < data.length; i += 4) {
+    if (Math.floor((i / 4) / w) < MASK_TOP_MARGIN) continue;
+    if (data[i] > MASK_THRESHOLD) {
+      fillData[i]   = 75;   // R  #4b9eff
+      fillData[i+1] = 158;  // G
+      fillData[i+2] = 255;  // B
+      fillData[i+3] = 77;   // ~30% opacity
+    }
+  }
+  const ocFill = document.createElement("canvas");
+  ocFill.width = w; ocFill.height = h;
+  ocFill.getContext("2d").putImageData(new ImageData(fillData, w, h), 0, 0);
+  maskFillCanvas = ocFill;
+
+  // ── Near-miss ring (amber) — morphological dilation minus original mask ──
+  const NR  = NEAR_MISS_RADIUS_PX;
+  const NR2 = NR * NR;
+  const dilated = new Uint8Array(w * h);
+  for (const { x: bx, y: by } of edgePixels) {
+    for (let dy = Math.max(0, by - NR); dy <= Math.min(h - 1, by + NR); dy++) {
+      for (let dx = Math.max(0, bx - NR); dx <= Math.min(w - 1, bx + NR); dx++) {
+        if ((dx - bx) * (dx - bx) + (dy - by) * (dy - by) <= NR2) dilated[dy * w + dx] = 1;
+      }
+    }
+  }
+  const nmData = new Uint8ClampedArray(w * h * 4);
+  for (let idx = 0; idx < w * h; idx++) {
+    if (dilated[idx] && data[idx * 4] <= MASK_THRESHOLD) {
+      const px = idx % w, py = Math.floor(idx / w);
+      if (py < MASK_TOP_MARGIN || px < 1 || px >= w - 1 || py >= h - 1) continue;
+      nmData[idx*4]   = 255;  // R  amber
+      nmData[idx*4+1] = 180;  // G
+      nmData[idx*4+2] = 0;    // B
+      nmData[idx*4+3] = 64;   // A ~25%
+    }
+  }
+  const oc2 = document.createElement("canvas");
+  oc2.width = w; oc2.height = h;
+  oc2.getContext("2d").putImageData(new ImageData(nmData, w, h), 0, 0);
+  maskNearMissCanvas = oc2;
+
+  // ── Tight green outline ──
+  const oc   = document.createElement("canvas");
+  oc.width   = w; oc.height = h;
+  const octx = oc.getContext("2d");
+  const DILATE = 2;
+  octx.strokeStyle = "rgba(75, 158, 255, 0.85)";
+  octx.lineWidth   = 1.5;
+  octx.beginPath();
+  for (const { x, y } of edgePixels) {
+    // Skip pixels within DILATE of the image boundary to avoid corner artifacts
+    if (x < DILATE || y < DILATE || x >= w - DILATE || y >= h - DILATE) continue;
+    octx.rect(x - DILATE, y - DILATE, DILATE * 2, DILATE * 2);
+  }
+  octx.stroke();
+  maskOutlineCanvas = oc;
+}
+
+// Blit pre-rendered layers onto the overlay: fill → near-miss ring → tight outline
+function drawMaskOutline() {
+  if (!maskOutlineCanvas) return;
+  if (maskFillCanvas)     ctx.drawImage(maskFillCanvas,     0, 0, overlay.width, overlay.height);
+  if (maskNearMissCanvas) ctx.drawImage(maskNearMissCanvas, 0, 0, overlay.width, overlay.height);
+  ctx.drawImage(maskOutlineCanvas, 0, 0, overlay.width, overlay.height);
+}
+
+
+// ══════════════════════════════════════════════
+//  CLICK HANDLER
+// ══════════════════════════════════════════════
+
+function enableClick() {
+  stimulus.addEventListener("click", onStimulusClick, { once: true });
+}
+
+function onStimulusClick(e) {
+  const clickTime = performance.now();
+  const rect  = stimulus.getBoundingClientRect();
+  const relX  = e.clientX - rect.left;
+  const relY  = e.clientY - rect.top;
+  const nx    = relX / rect.width;
+  const ny    = relY / rect.height;
+
+  let hit              = false;
+  let nearMiss         = false;
+  let centroidDistance = null;
+  let nearestDx        = null;
+  let nearestDy        = null;
+
+  if (currentCentroid && maskCanvas.width > 0) {
+    const mx    = Math.floor(nx * maskCanvas.width);
+    const my    = Math.floor(ny * maskCanvas.height);
+    const pixel = maskCtx.getImageData(mx, my, 1, 1).data;
+    hit         = pixel[0] > MASK_THRESHOLD;
+
+    const dx = mx - currentCentroid.x;
+    const dy = my - currentCentroid.y;
+    centroidDistance = Math.sqrt(dx*dx + dy*dy) / maskCanvas.width;
+
+    if (!hit && maskBoundaryPixels.length > 0) {
+      let minDist2 = Infinity;
+      for (const bp of maskBoundaryPixels) {
+        const bdx = mx - bp.x, bdy = my - bp.y;
+        const d2  = bdx*bdx + bdy*bdy;
+        if (d2 < minDist2) { minDist2 = d2; nearestDx = bdx / maskCanvas.width; nearestDy = bdy / maskCanvas.height; }
+      }
+      if (Math.sqrt(minDist2) <= NEAR_MISS_RADIUS_PX) nearMiss = true;
+    }
+  }
+
+  endTrial({
+    reaction_time_ms:          clickTime - stimulusStartTime,
+    click_x_norm:              parseFloat(nx.toFixed(5)),
+    click_y_norm:              parseFloat(ny.toFixed(5)),
+    hit,
+    near_miss:                 nearMiss,
+    response_type:             "click",
+    centroid_distance_norm:    centroidDistance !== null ? parseFloat(centroidDistance.toPrecision(5)) : null,
+    nearest_boundary_dx_norm:  nearestDx !== null ? parseFloat(nearestDx.toFixed(5)) : null,
+    nearest_boundary_dy_norm:  nearestDy !== null ? parseFloat(nearestDy.toFixed(5)) : null
+  });
+}
+
+
+// ══════════════════════════════════════════════
+//  SPACE (absent response)
+// ══════════════════════════════════════════════
+
+function handleSpaceAbsent() {
+  const rt = performance.now() - stimulusStartTime;
+
+  // Hit = correct if this was indeed a no-target trial (mask is null)
+  const hit = (currentCentroid === null);
+
+  showingFeedback = true;
+
+  endTrial({
+    reaction_time_ms:         rt,
+    click_x_norm:             null,
+    click_y_norm:             null,
+    hit,
+    near_miss:                false,
+    response_type:            "space_absent",
+    centroid_distance_norm:   null,
+    nearest_boundary_dx_norm:  null,
+    nearest_boundary_dy_norm:  null
+  });
+}
+
+
+// ══════════════════════════════════════════════
+//  END TRIAL
+// ══════════════════════════════════════════════
+
+function endTrial(data) {
+  trialActive     = false;
+  showingFeedback = true;
+  spaceEnabled    = false;
+  responseInstruction.style.display = "none";
+
+  clearTimeout(timeoutTimer);
+  stopTrajectoryRecording();
+
+  const trial = phases[phaseIndex].trials[trialIndex];
+
+  report.trials.push({
+    image_id:   trial.id,
+    phase:      trial.phase,
+    no_target:  trial.noTarget,
+    timeout:    false,
+    trajectory: ENABLE_TRAJECTORY ? currentTrajectory : null,
+    ...data
+  });
+
+  saveData();
+  drawMaskOutline();
+
+  // Draw feedback symbol/text on top of mask layers
+  if (data.response_type === "click") {
+    const fx = data.click_x_norm * overlay.width;
+    const fy = data.click_y_norm * overlay.height;
+    showFeedback(fx, fy, data.hit, data.near_miss);
+    if (currentCentroid === null) showCenteredText("✗ No target present — press Space if no target");
+  } else if (data.response_type === "space_absent") {
+    showCenteredText(data.hit ? "✓ Correct — no target" : "✗ Target present");
+  }
+
+  const noTargetClick = data.response_type === "click" && currentCentroid === null;
+  const feedbackMs    = noTargetClick ? 2500 : 1500;
+  setTimeout(nextTrial, feedbackMs);
+}
+
+
+// ══════════════════════════════════════════════
+//  TIMEOUT
+//  FIX: now calls saveData() (was missing)
+// ══════════════════════════════════════════════
+
+function handleTimeout() {
+  trialActive  = false;
+  spaceEnabled = false;
+  responseInstruction.style.display = "none";
+
+  stopTrajectoryRecording();
+
+  const trial = phases[phaseIndex].trials[trialIndex];
+
+  report.trials.push({
+    image_id:        trial.id,
+    phase:           trial.phase,
+    no_target:       trial.noTarget,
+    timeout:                true,
+    reaction_time_ms:       MAX_SEARCH_TIME,
+    response_type:          "timeout",
+    hit:                    false,
+    near_miss:              false,
+    click_x_norm:           null,
+    click_y_norm:           null,
+    centroid_distance_norm: null,
+    nearest_boundary_dx_norm: null,
+    nearest_boundary_dy_norm: null,
+    trajectory:             ENABLE_TRAJECTORY ? currentTrajectory : null
+  });
+
+  saveData(); // FIX: was missing
+
+  const overlay = document.getElementById("timeoutOverlay");
+  overlay.style.display = "flex";
+  setTimeout(() => {
+    overlay.style.display = "none";
+    nextTrial();
+  }, TIMEOUT_MSG_DURATION);
+}
+
+
+// ══════════════════════════════════════════════
+//  NEXT TRIAL
+// ══════════════════════════════════════════════
+
+function nextTrial() {
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+  stimulus.style.display = "none";
+  stimulus.src           = "";
+
+  const blackout = document.getElementById("blackout");
+  blackout.style.display = "block";
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        blackout.style.display = "none";
+        trialIndex++;
+
+        if (trialIndex >= phases[phaseIndex].trials.length) {
+          const finishedName = phases[phaseIndex].name;
+          phaseIndex++;
+          trialIndex = 0;
+          if (phaseIndex >= phases.length) {
+            finishExperiment();
+            return;
+          }
+          if (SHOW_PHASE_BREAK && finishedName === "practice") {
+            showScreen("phase-break");
+            return;
+          }
+        }
+
+        progressWrapper.style.display = "block";
+        updateProgressBar();
+        instructionEl.style.display   = "block";
+        startCircle.style.display     = "block";
+      }, 100);
+    });
+  });
+}
+
+function resumeAfterBreak() {
+  showScreen("experiment");
+  progressWrapper.style.display = "block";
+  updateProgressBar();
+  instructionEl.style.display   = "block";
+  startCircle.style.display     = "block";
+}
+
+
+// ══════════════════════════════════════════════
+//  TRAJECTORY RECORDING
+// ══════════════════════════════════════════════
+
+function startTrajectoryRecording() {
+  if (!ENABLE_TRAJECTORY) return;
+  currentTrajectory = [];
+  trajectoryTimer = setInterval(() => {
+    const rect = stimulus.getBoundingClientRect();
+    const x    = (lastMouseX - rect.left) / rect.width;
+    const y    = (lastMouseY - rect.top)  / rect.height;
+    const t    = Math.round(performance.now() - stimulusStartTime);
+    const S    = 10000;
+    currentTrajectory.push([t, Math.round(x * S), Math.round(y * S)]);
+  }, TRAJECTORY_SAMPLE_MS);
+}
+
+function stopTrajectoryRecording() {
+  if (trajectoryTimer) { clearInterval(trajectoryTimer); trajectoryTimer = null; }
+}
+
+
+// ══════════════════════════════════════════════
+//  PROGRESS BAR
+//  FIX: robust to any number/name of phases
+// ══════════════════════════════════════════════
+
+function updateProgressBar() {
+  const allTrials     = phases.reduce((s, p) => s + p.trials.length, 0);
+  const practicePhase = phases.find(p => p.name === "practice");
+  const practiceTotal = practicePhase ? practicePhase.trials.length : 0;
+  const realTotal     = allTrials - practiceTotal;
+
+  let doneBefore = 0;
+  for (let pi = 0; pi < phaseIndex; pi++) doneBefore += phases[pi].trials.length;
+  const doneTotal = doneBefore + trialIndex;
+
+  const donePractice = Math.min(doneTotal, practiceTotal);
+  const doneReal     = Math.max(0, doneTotal - practiceTotal);
+
+  progressPracticeEl.style.width = ((donePractice / allTrials) * 100) + "%";
+  progressRealEl.style.width     = ((doneReal     / allTrials) * 100) + "%";
+
+  const phase = phases[phaseIndex];
+  const label = phase.name === "practice" ? "Practice" : "Experiment";
+  progressTextEl.textContent = `${label} · Trial ${doneTotal + 1} of ${allTrials}`;
+}
+
+
+// ══════════════════════════════════════════════
+//  FEEDBACK
+// ══════════════════════════════════════════════
+
+function showFeedback(x, y, hit, nearMiss) {
+  ctx.save();
+  ctx.font         = "bold 44px sans-serif";
+  ctx.textAlign    = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor  = "rgba(0,0,0,0.8)";
+  ctx.shadowBlur   = 6;
+  ctx.fillStyle    = hit ? "#30c97a" : nearMiss ? "#f5a623" : "#e05252";
+  ctx.fillText(hit || nearMiss ? "✓" : "✗", x, y);
+  ctx.restore();
+}
+
+function showCenteredText(text) {
+  ctx.save();
+  ctx.font         = "600 20px Outfit, sans-serif";
+  ctx.textAlign    = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor  = "rgba(0,0,0,0.85)";
+  ctx.shadowBlur   = 5;
+  ctx.shadowOffsetX = 1;
+  ctx.shadowOffsetY = 1;
+  ctx.fillStyle    = "rgba(255,255,255,0.95)";
+  ctx.fillText(text, overlay.width / 2, overlay.height / 2);
+  ctx.restore();
+}
+
+
+// ══════════════════════════════════════════════
+//  DATA SAVING
+// ══════════════════════════════════════════════
+
+function saveData() {
+  // Always save locally (fallback)
+  localStorage.setItem("camo_partial", JSON.stringify(report));
+
+  // Send to server endpoint if configured
+  if (DATA_ENDPOINT) {
+    fetch(DATA_ENDPOINT, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(report)
+    }).catch(() => {/* silent — partial data is still in localStorage */});
+  }
+}
+
+
+// ══════════════════════════════════════════════
+//  FINISH
+// ══════════════════════════════════════════════
+
+function finishExperiment() {
+  if (experimentFinished) return;
+  experimentFinished    = true;
+  report.end_time       = new Date().toISOString();
+
+  saveData(); // Final save — includes end_time
+
+  showScreen("thankyou");
+
+  // Auto-download JSON results
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `camo_${report.participant_id.slice(0, 8)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 200);
+}
+
+
+// ══════════════════════════════════════════════
+//  OVERLAY SYNC
+// ══════════════════════════════════════════════
+
+function syncOverlay() {
+  const rect = stimulus.getBoundingClientRect();
+  overlay.style.left   = rect.left   + "px";
+  overlay.style.top    = rect.top    + "px";
+  overlay.style.width  = rect.width  + "px";
+  overlay.style.height = rect.height + "px";
+  overlay.width  = Math.round(rect.width);
+  overlay.height = Math.round(rect.height);
+  if (rect.height > 0) {
+    startContainer.style.top    = (rect.bottom + 24) + "px";
+    startContainer.style.bottom = "auto";
+  }
+  if (showingFeedback && maskOutlineCanvas) drawMaskOutline();
+}
+
+new ResizeObserver(() => {
+  if (stimulus.style.display === "none") return;
+  syncOverlay();
+}).observe(stimulus);
+
+// Also sync on window resize: the ResizeObserver only fires when the stimulus
+// changes SIZE, but going fullscreen can move the image without resizing it
+// (both clamp limits already reached). The resize event fires synchronously,
+// so it is always processed before any subsequent click event.
+window.addEventListener("resize", () => {
+  if (stimulus.style.display !== "none") syncOverlay();
+});
+
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+
+if (checkDevice()) {
+  showScreen("consent");
+}
+
+</script>
+</body>
+</html>
