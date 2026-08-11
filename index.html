@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Camouflage Perception Study</title>
+  <title>Camouflage Detection Study</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -213,6 +213,48 @@
     }
 
     .form-full { grid-column: 1 / -1; }
+
+
+    /* ────────────────── EXAMPLE ────────────────── */
+    #example { padding: 24px; overflow-y: auto; }
+
+    .example-row { margin-bottom: 20px; }
+
+    .example-label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .example-pair {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .example-img-wrap {
+      flex: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border2);
+      line-height: 0;
+    }
+
+    .example-img-wrap img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .example-arrow {
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 22px;
+    }
 
     .form-divider {
       grid-column: 1 / -1;
@@ -494,6 +536,21 @@
       line-height: 1.7;
     }
 
+    .ty-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .ty-stat {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 10px;
+    }
+    .ty-stat-value { font-size: 26px; font-weight: 700; color: var(--text); }
+    .ty-stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
   </style>
 </head>
 <body>
@@ -514,13 +571,13 @@
 <div id="consent" class="screen">
   <div class="consent-card">
     <div class="study-tag">Research Study</div>
-    <h1>Camouflage Perception Study</h1>
+    <h1>Camouflage Detection Study</h1>
     <p class="subtitle">Measuring how quickly people detect camouflaged objects in forest scenes</p>
 
     <div class="rule-list">
       <div class="rule-item">
         <span class="rule-icon">🎯</span>
-        <span>Images may contain a camouflaged object that looks like a rock — <u>click</u> as quickly and accurately as possible where you think it is.</span>
+        <span>Images may contain a camouflaged object - <u>click</u> as quickly and accurately as possible where you think it is.</span>
       </div>
       <div class="rule-item">
         <span class="rule-icon">⌨️</span>
@@ -530,17 +587,17 @@
     <div class="rule-list">
       <div class="rule-item">
         <span class="rule-icon">⏱️</span>
-        <span>Each trial has a time limit of 12 seconds — respond as fast as you can without sacrificing accuracy.</span>
+        <span>Each trial has a time limit of 12 seconds - respond as fast as you can without sacrificing accuracy.</span>
       </div>
       <div class="rule-item">
         <span class="rule-icon">⌛</span>
-        <span>There will be 5 practice images followed by actual study images. The whole test takes between 5 and 10 minutes.</span>
+        <span>There will be 5 practice images followed by actual study images. The whole test takes around 5 minutes.</span>
       </div>
     </div>
     <div class="rule-list">
       <div class="rule-item">
         <span class="rule-icon">🖱️</span>
-        <span>Requires a computer with a mouse — do not use a trackpad if possible.</span>
+        <span>Requires a computer with a mouse. Do not use a trackpad if possible.</span>
       </div>
     </div>
 
@@ -553,17 +610,19 @@
 <div id="demographics" class="screen">
   <div class="demo-card">
     <h2>About You</h2>
-    <p class="demo-sub">A few quick questions — takes under a minute.</p>
+    <p class="demo-sub"> </p>
 
     <div class="form-grid">
 
       <div class="form-field">
         <label>Age range</label>
         <select id="age">
-          <option value="18-25">18 – 25</option>
-          <option value="26-35">26 – 35</option>
-          <option value="36-50">36 – 50</option>
-          <option value="50+">50+</option>
+          <option value="18-24">18–24</option>
+          <option value="25-34">25–34</option>
+          <option value="35-44">35–44</option>
+          <option value="45-54">45–54</option>
+          <option value="55-64">55–64</option>
+          <option value="64+">64+</option>
         </select>
       </div>
 
@@ -610,6 +669,35 @@
       </div>
 
     </div>
+  </div>
+</div>
+
+<!-- ════════════════ EXAMPLE ════════════════ -->
+<div id="example" class="screen">
+  <div class="consent-card" style="max-width:960px">
+    <div class="study-tag">How It Works</div>
+    <h1>What You're Looking For</h1>
+    <p class="subtitle">Each scene may hide an amorphous, irregularly-shaped object in plain sight or partially obscured.</p>
+
+    <div class="example-row">
+      <div class="example-label">Example 1 — target found</div>
+      <div class="example-pair">
+        <div class="example-img-wrap"><img src="assets/example/Example1_camo_image.webp" alt="Example scene before response"></div>
+        <div class="example-arrow">→</div>
+        <div class="example-img-wrap"><img src="assets/example/Example1_camo_image_mask-success.webp" alt="Example scene showing a correct click on the target"></div>
+      </div>
+    </div>
+
+    <div class="example-row">
+      <div class="example-label">Example 2 — target missed</div>
+      <div class="example-pair">
+        <div class="example-img-wrap"><img src="assets/example/Example2_camo_image.webp" alt="Example scene before response"></div>
+        <div class="example-arrow">→</div>
+        <div class="example-img-wrap"><img src="assets/example/Example2_camo_image_mask-fail.webp" alt="Example scene showing a missed click away from the target"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="proceedFromExample()">Start Practice →</button>
   </div>
 </div>
 
@@ -683,6 +771,25 @@
       Your results file has been downloaded automatically.
       If it didn't download, please let the researcher know.
     </p>
+
+    <div class="ty-stats" id="tyStats">
+      <div class="ty-stat">
+        <div class="ty-stat-value" id="statTargetsFound">–</div>
+        <div class="ty-stat-label">Targets found</div>
+      </div>
+      <div class="ty-stat">
+        <div class="ty-stat-value" id="statNoTargetCorrect">–</div>
+        <div class="ty-stat-label">Correctly flagged "no target"</div>
+      </div>
+      <div class="ty-stat">
+        <div class="ty-stat-value" id="statAvgHitTime">–</div>
+        <div class="ty-stat-label">Avg. time when found</div>
+      </div>
+      <div class="ty-stat">
+        <div class="ty-stat-value" id="statAvgNoTargetTime">–</div>
+        <div class="ty-stat-label">Avg. time on empty scenes</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -886,6 +993,10 @@ function startFromDemographics() {
     motor:      document.getElementById("motor").value,
     first_time: document.getElementById("first_time").value
   };
+  showScreen("example");
+}
+
+function proceedFromExample() {
   showScreen("loading");
   startExperiment();
 }
@@ -1599,6 +1710,26 @@ function patchSupabase(payload, headers) {
 //  FINISH
 // ══════════════════════════════════════════════
 
+function computeAndRenderStats() {
+  const real           = report.trials.filter(t => t.phase === "real");
+  const targetTrials   = real.filter(t => !t.no_target);
+  const noTargetTrials = real.filter(t => t.no_target);
+
+  const targetHits      = targetTrials.filter(t => t.hit || t.near_miss);
+  const noTargetCorrect = noTargetTrials.filter(t => t.response_type === "space_absent" && t.hit);
+
+  const avgRT = trials => {
+    if (!trials.length) return null;
+    return trials.reduce((s, t) => s + t.reaction_time_ms, 0) / trials.length;
+  };
+  const fmtTime = ms => ms == null ? "–" : (ms / 1000).toFixed(1) + "s";
+
+  document.getElementById("statTargetsFound").textContent    = `${targetHits.length} / ${targetTrials.length}`;
+  document.getElementById("statNoTargetCorrect").textContent = `${noTargetCorrect.length} / ${noTargetTrials.length}`;
+  document.getElementById("statAvgHitTime").textContent      = fmtTime(avgRT(targetHits));
+  document.getElementById("statAvgNoTargetTime").textContent = fmtTime(avgRT(noTargetCorrect));
+}
+
 function finishExperiment() {
   if (experimentFinished) return;
   experimentFinished    = true;
@@ -1607,6 +1738,7 @@ function finishExperiment() {
   saveData();       // Final local save — includes end_time
   saveToSupabase(); // Final Supabase save — marks completed: true
 
+  computeAndRenderStats();
   showScreen("thankyou");
 
   // Auto-download JSON results
