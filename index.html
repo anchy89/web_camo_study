@@ -83,7 +83,7 @@
       border: 1px solid var(--border);
       border-radius: 22px;
       padding: 44px 52px;
-      max-width: 700px;
+      max-width: 600px;
       width: 100%;
     }
 
@@ -112,7 +112,7 @@
     .consent-card .subtitle {
       color: var(--muted);
       font-size: 18px;
-      margin-bottom: 45px;
+      margin-bottom: 25px;
     }
 
     .rule-list {
@@ -136,10 +136,29 @@
     .rule-list + .rule-list { margin-top: 15px; }
     .rule-icon { font-size: 21px; flex-shrink: 0; margin-top: 1px; }
 
+    /* Emphasized variant used for the response instructions on the example page */
+    .rule-list-prominent {
+      background: var(--accent-dim);
+      border-color: rgba(75,158,255,0.28);
+    }
+    .rule-item-prominent {
+      font-size: 19px;
+      font-weight: 600;
+      padding: 16px 18px;
+    }
+    .rule-icon-prominent { font-size: 25px; }
+
+    .consent-fineprint {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
     .consent-note {
       font-size: 16px;
       color: var(--muted);
-      margin-top: 45px;
+      margin-top: 25px;
       margin-bottom: 20px;
       display: flex;
       align-items: center;
@@ -218,43 +237,94 @@
     /* ────────────────── EXAMPLE ────────────────── */
     #example { padding: 24px; overflow-y: auto; }
 
-    .example-row { margin-bottom: 20px; }
+    .example-slideshow { margin-top: 4px; }
 
-    .example-label {
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .example-pair {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .example-img-wrap {
-      flex: 1;
-      border-radius: 10px;
+    .example-slide-frame {
+      position: relative;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border2);
+      background: #000;
       line-height: 0;
     }
 
-    .example-img-wrap img {
+    .example-slide-frame img {
       width: 100%;
-      height: 280px;
-      object-fit: cover;
+      height: auto;
       display: block;
     }
 
-    .example-arrow {
-      flex-shrink: 0;
-      color: var(--muted);
-      font-size: 22px;
+    /* Marks the slide as a non-interactive demo image, not a real trial */
+    .example-watermark {
+      position: absolute;
+      top: 24px;
+      left: 28px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #fff;
+      -webkit-text-stroke: 1.2px #000;
+      paint-order: stroke fill;
+      text-shadow: 0 0 3px rgba(0,0,0,0.6);
+      pointer-events: none;
+      user-select: none;
     }
+
+    .example-caption {
+      margin-top: 12px;
+      font-size: 16px;
+      color: var(--muted);
+      text-align: center;
+      min-height: 22px;
+    }
+
+    .example-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .example-nav-btn {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 20px;
+      font-family: var(--font);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .example-nav-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .example-dots {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .example-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      background: var(--border2);
+      cursor: pointer;
+    }
+
+    .example-dot.active { background: var(--accent); }
 
     .form-divider {
       grid-column: 1 / -1;
@@ -289,6 +359,14 @@
 
     .btn-primary:hover  { opacity: 0.85; transform: translateY(-1px); }
     .btn-primary:active { transform: translateY(0); opacity: 1; }
+
+    /* Shrinks the button to fit its label and pushes it to the right edge
+       of its (block-level) container instead of stretching full-width. */
+    .btn-align-right {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: 0;
+    }
 
 
     /* ────────────────── LOADING ────────────────── */
@@ -367,17 +445,24 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
       text-align: center;
     }
 
+    /* Positioned independently of #startContainer so it can sit at
+       screen-center while the circle stays anchored below the image. */
     #instruction {
-      font-size: 20px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 30px;
       color: var(--muted);
+      text-align: center;
+      max-width: 70vw;
     }
 
     #startCircle {
-      width: 64px; height: 64px;
+      width: 92px; height: 92px;
       border-radius: 50%;
       background: #28282e;
       border: 2px solid rgba(255,255,255,0.1);
@@ -570,39 +655,22 @@
 <!-- ════════════════ CONSENT ════════════════ -->
 <div id="consent" class="screen">
   <div class="consent-card">
-    <div class="study-tag">Research Study</div>
     <h1>Camouflage Detection Study</h1>
     <p class="subtitle">Measuring how quickly people detect camouflaged objects in forest scenes</p>
 
     <div class="rule-list">
       <div class="rule-item">
         <span class="rule-icon">🎯</span>
-        <span>Images may contain a camouflaged object - <u>click</u> as quickly and accurately as possible where you think it is.</span>
+        <span>Find the camouflaged object hidden in each scene - click where you think it is, or press <kbd>Space</kbd> if you think there's none.</span>
       </div>
       <div class="rule-item">
-        <span class="rule-icon">⌨️</span>
-        <span>Press <kbd>Space</kbd> if you believe <u>no target</u> is present in the image.</span>
+        <span class="rule-icon">🖥️</span>
+        <span>Takes about 5 minutes. Requires a computer with a mouse. Do not use a trackpad if possible.</span>
       </div>
     </div>
-    <div class="rule-list">
-      <div class="rule-item">
-        <span class="rule-icon">⏱️</span>
-        <span>Each trial has a time limit of 12 seconds - respond as fast as you can without sacrificing accuracy.</span>
-      </div>
-      <div class="rule-item">
-        <span class="rule-icon">⌛</span>
-        <span>There will be 5 practice images followed by actual study images. The whole test takes around 5 minutes.</span>
-      </div>
-    </div>
-    <div class="rule-list">
-      <div class="rule-item">
-        <span class="rule-icon">🖱️</span>
-        <span>Requires a computer with a mouse. Do not use a trackpad if possible.</span>
-      </div>
-    </div>
-
-    <p class="consent-note">🔒 Your responses are anonymous and will only be used for research purposes.</p>
-    <button class="btn btn-primary" onclick="showDemographics()">Agree &amp; Continue →</button>
+    
+    <p class="consent-note">Your responses are anonymous and will only be used for research purposes. Cursor movement, click/space button press and timing are recorded. Participation is voluntary and can be stopped at any time.</p>
+    <button class="btn btn-primary btn-align-right" onclick="showDemographics()">Agree &amp; Continue →</button>
   </div>
 </div>
 
@@ -638,6 +706,8 @@
 
       <div class="form-divider"></div>
 
+      <!-- Color blindness question disabled: stimuli are grayscale thermal
+           images, color is only used for supplementary click feedback.
       <div class="form-field">
         <label>Color blindness?</label>
         <select id="colorblind">
@@ -645,9 +715,10 @@
           <option value="yes">Yes</option>
         </select>
       </div>
+      -->
 
-      <div class="form-field">
-        <label>Motor impairment?</label>
+      <div class="form-field form-full">
+        <label>Hand/arm coordination issues (e.g. injury)?</label>
         <select id="motor">
           <option value="no">No</option>
           <option value="yes">Yes</option>
@@ -657,7 +728,7 @@
       <div class="form-divider"></div>
 
       <div class="form-field form-full">
-        <label>First time doing this test?</label>
+        <label>First time doing this study?</label>
         <select id="first_time">
           <option value="yes">Yes, this is my first time</option>
           <option value="no">No, I have done it before</option>
@@ -665,7 +736,7 @@
       </div>
 
       <div class="form-full">
-        <button class="btn btn-primary" onclick="startFromDemographics()">Start Experiment →</button>
+        <button class="btn btn-primary btn-align-right" onclick="startFromDemographics()">Continue to instructions →</button>
       </div>
 
     </div>
@@ -674,30 +745,35 @@
 
 <!-- ════════════════ EXAMPLE ════════════════ -->
 <div id="example" class="screen">
-  <div class="consent-card" style="max-width:960px">
-    <div class="study-tag">How It Works</div>
-    <h1>What You're Looking For</h1>
-    <p class="subtitle">Each scene may hide an amorphous, irregularly-shaped object in plain sight or partially obscured.</p>
+  <div class="consent-card" style="max-width:720px">
+    <h1>Instructions</h1>
+    <p class="subtitle">Each scene may hide one amorphous, irregularly-shaped object in plain sight or partially obscured.</p>
 
-    <div class="example-row">
-      <div class="example-label">Example 1 — target found</div>
-      <div class="example-pair">
-        <div class="example-img-wrap"><img src="assets/example/Example1_camo_image.webp" alt="Example scene before response"></div>
-        <div class="example-arrow">→</div>
-        <div class="example-img-wrap"><img src="assets/example/Example1_camo_image_mask-success.webp" alt="Example scene showing a correct click on the target"></div>
+    <div class="rule-list">
+      <div class="rule-item">
+        <span><u>Click</u> the target - as fast and accurately as you can.</span>
+      </div>
+      <div class="rule-item">
+        <span><u>Press</u> <kbd>Space</kbd> if you think there's no target.</span>
       </div>
     </div>
 
-    <div class="example-row">
-      <div class="example-label">Example 2 — target missed</div>
-      <div class="example-pair">
-        <div class="example-img-wrap"><img src="assets/example/Example2_camo_image.webp" alt="Example scene before response"></div>
-        <div class="example-arrow">→</div>
-        <div class="example-img-wrap"><img src="assets/example/Example2_camo_image_mask-fail.webp" alt="Example scene showing a missed click away from the target"></div>
+    <div class="example-slideshow">
+      <div class="example-slide-frame">
+        <img id="exampleSlideImg" src="" alt="">
+        <div class="example-watermark">EXAMPLE IMAGE</div>
+      </div>
+      <div class="example-caption" id="exampleCaption"></div>
+      <div class="example-nav">
+        <button type="button" class="example-nav-btn" id="examplePrev" aria-label="Previous example">‹</button>
+        <div class="example-dots" id="exampleDots"></div>
+        <button type="button" class="example-nav-btn" id="exampleNext" aria-label="Next example">›</button>
       </div>
     </div>
 
-    <button class="btn btn-primary" onclick="proceedFromExample()">Start Practice →</button>
+    <p class="consent-note">A short practice round comes first. Each image has a 12-second search time limit.</p>
+
+    <button class="btn btn-primary btn-align-right" onclick="proceedFromExample()">Start practice →</button>
   </div>
 </div>
 
@@ -750,8 +826,9 @@
   <img id="stimulus" draggable="false" alt="">
   <canvas id="overlay"></canvas>
 
+  <div id="instruction">Move your cursor to the circle below</div>
+
   <div id="startContainer">
-    <div id="instruction">Move your cursor to the circle below</div>
     <div id="startCircle"></div>
   </div>
 
@@ -891,6 +968,14 @@ let trialActive       = false;
 let showingFeedback   = false;  // true only during post-response feedback window
 let supabaseRowCreated = false; // tracks whether first INSERT to Supabase has succeeded
 
+// Guards against the hover circle firing a phantom "mouseenter" when it
+// reappears under an already-stationary cursor (e.g. right where a button
+// on the previous screen was clicked) — only real cursor movement re-arms it.
+let circleArmed       = true;
+let armOriginX        = 0;
+let armOriginY        = 0;
+const CIRCLE_ARM_MOVE_PX = 6;
+
 
 // ══════════════════════════════════════════════
 //  REPORT OBJECT
@@ -938,7 +1023,18 @@ document.addEventListener("contextmenu", e => e.preventDefault());
 document.addEventListener("mousemove", e => {
   lastMouseX = e.clientX;
   lastMouseY = e.clientY;
+  if (!circleArmed && Math.hypot(e.clientX - armOriginX, e.clientY - armOriginY) > CIRCLE_ARM_MOVE_PX) {
+    circleArmed = true;
+  }
 });
+
+// Call before the hover circle (re)appears so a stationary cursor can't
+// trigger it — see the `circleArmed` comment above.
+function disarmCircle() {
+  circleArmed = false;
+  armOriginX  = lastMouseX;
+  armOriginY  = lastMouseY;
+}
 
 document.addEventListener("keydown", e => {
   if (!trialActive || !spaceEnabled) return;
@@ -989,16 +1085,61 @@ function startFromDemographics() {
   report.demographics = {
     age:        document.getElementById("age").value,
     sex:        document.getElementById("sex").value,
-    colorblind: document.getElementById("colorblind").value,
+    // colorblind: disabled in the form above — stimuli are grayscale.
     motor:      document.getElementById("motor").value,
     first_time: document.getElementById("first_time").value
   };
+  goToExampleSlide(0);
   showScreen("example");
 }
 
 function proceedFromExample() {
   showScreen("loading");
   startExperiment();
+}
+
+
+// ══════════════════════════════════════════════
+//  EXAMPLE SLIDESHOW
+// ══════════════════════════════════════════════
+
+const EXAMPLE_SLIDES = [
+  { src: "assets/example/Example1_camo_image.webp",              caption: "Example 1 - target is clearly seen" },
+  { src: "assets/example/Example1_camo_image_mask-success.webp", caption: "Example 1 - a correct click on the target" },
+  { src: "assets/example/Example2_camo_image.webp",               caption: "Example 2 - target si more hidden" },
+  { src: "assets/example/Example2_camo_image_mask-fail.webp",    caption: "Example 2 - a click that missed the target" },
+  { src: "assets/example/Example3_camo_image.webp",               caption: "Example 3 - no target is present" },
+  { src: "assets/example/Example3_camo_image-miss-no-target.webp",    caption: "Example 3 - a click, but Space was correct" }
+];
+let exampleSlideIndex = 0;
+
+function renderExampleSlide() {
+  const slide = EXAMPLE_SLIDES[exampleSlideIndex];
+  document.getElementById("exampleSlideImg").src = slide.src;
+  document.getElementById("exampleCaption").textContent = slide.caption;
+  document.querySelectorAll("#exampleDots .example-dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === exampleSlideIndex);
+  });
+}
+
+function goToExampleSlide(i) {
+  exampleSlideIndex = (i + EXAMPLE_SLIDES.length) % EXAMPLE_SLIDES.length;
+  renderExampleSlide();
+}
+
+function initExampleSlideshow() {
+  const dotsEl = document.getElementById("exampleDots");
+  EXAMPLE_SLIDES.forEach((_, i) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "example-dot";
+    dot.setAttribute("aria-label", `Go to example ${i + 1}`);
+    dot.onclick = () => goToExampleSlide(i);
+    dotsEl.appendChild(dot);
+  });
+  document.getElementById("examplePrev").addEventListener("click", () => goToExampleSlide(exampleSlideIndex - 1));
+  document.getElementById("exampleNext").addEventListener("click", () => goToExampleSlide(exampleSlideIndex + 1));
+  renderExampleSlide();
 }
 
 
@@ -1115,6 +1256,7 @@ async function startExperiment() {
 
   phaseIndex = 0;
   trialIndex = 0;
+  disarmCircle();
   showScreen("experiment");
   progressWrapper.style.display = "block";
   updateProgressBar();
@@ -1126,6 +1268,7 @@ async function startExperiment() {
 // ══════════════════════════════════════════════
 
 startCircle.addEventListener("mouseenter", () => {
+  if (!circleArmed) return;
   startCircle.classList.add("active");
   hoverTimer = setTimeout(showStimulus, 1000);
 });
@@ -1149,7 +1292,6 @@ async function showStimulus() {
 
   startCircle.style.display      = "none";
   instructionEl.style.display    = "none";
-  progressWrapper.style.display  = "none";
 
   // Immediately clear state from previous trial
   showingFeedback    = false;
@@ -1447,9 +1589,9 @@ function endTrial(data) {
     const fx = data.click_x_norm * overlay.width;
     const fy = data.click_y_norm * overlay.height;
     showFeedback(fx, fy, data.hit, data.near_miss);
-    if (currentCentroid === null) showCenteredText("✗ No target present — press Space if no target");
+    if (currentCentroid === null) showCenteredText("✗ No target here - press Space next time");
   } else if (data.response_type === "space_absent") {
-    showCenteredText(data.hit ? "✓ Correct — no target" : "✗ Target present");
+    showCenteredText(data.hit ? "✓ Correct - no target" : "✗ Target present");
   }
 
   const noTargetClick = data.response_type === "click" && currentCentroid === null;
@@ -1536,6 +1678,7 @@ function nextTrial() {
         progressWrapper.style.display = "block";
         updateProgressBar();
         instructionEl.style.display   = "block";
+        disarmCircle();
         startCircle.style.display     = "block";
       }, 100);
     });
@@ -1547,6 +1690,7 @@ function resumeAfterBreak() {
   progressWrapper.style.display = "block";
   updateProgressBar();
   instructionEl.style.display   = "block";
+  disarmCircle();
   startCircle.style.display     = "block";
 }
 
@@ -1789,6 +1933,8 @@ window.addEventListener("resize", () => {
 // ══════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════
+
+initExampleSlideshow();
 
 if (checkDevice()) {
   showScreen("consent");
