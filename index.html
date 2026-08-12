@@ -649,7 +649,7 @@
     It cannot be completed on a smartphone or tablet.<br><br>
     Please re-open this page on a desktop device to participate.
   </p>
-  <div class="device-note">📧 Share the link with yourself and open it on a computer</div>
+  <div class="device-note">📧 Share the link with yourself and open it on a computer.</div>
 </div>
 
 <!-- ════════════════ CONSENT ════════════════ -->
@@ -661,7 +661,7 @@
     <div class="rule-list">
       <div class="rule-item">
         <span class="rule-icon">🎯</span>
-        <span>Find the camouflaged object hidden in each scene - click where you think it is, or press <kbd>Space</kbd> if you think there's none.</span>
+        <span>Find the object hidden in each scene - click where you think it is, or press <kbd>Space</kbd> if you think there's none.</span>
       </div>
       <div class="rule-item">
         <span class="rule-icon">🖥️</span>
@@ -747,7 +747,7 @@
 <div id="example" class="screen">
   <div class="consent-card" style="max-width:720px">
     <h1>Instructions</h1>
-    <p class="subtitle">Each scene may hide one amorphous, irregularly-shaped object in plain sight or partially obscured.</p>
+    <p class="subtitle">Each scene may hide one amorphous, irregularly-shaped object in plain sight or it might be partially obscured.</p>
 
     <div class="rule-list">
       <div class="rule-item">
@@ -968,14 +968,6 @@ let trialActive       = false;
 let showingFeedback   = false;  // true only during post-response feedback window
 let supabaseRowCreated = false; // tracks whether first INSERT to Supabase has succeeded
 
-// Guards against the hover circle firing a phantom "mouseenter" when it
-// reappears under an already-stationary cursor (e.g. right where a button
-// on the previous screen was clicked) — only real cursor movement re-arms it.
-let circleArmed       = true;
-let armOriginX        = 0;
-let armOriginY        = 0;
-const CIRCLE_ARM_MOVE_PX = 6;
-
 
 // ══════════════════════════════════════════════
 //  REPORT OBJECT
@@ -1023,18 +1015,7 @@ document.addEventListener("contextmenu", e => e.preventDefault());
 document.addEventListener("mousemove", e => {
   lastMouseX = e.clientX;
   lastMouseY = e.clientY;
-  if (!circleArmed && Math.hypot(e.clientX - armOriginX, e.clientY - armOriginY) > CIRCLE_ARM_MOVE_PX) {
-    circleArmed = true;
-  }
 });
-
-// Call before the hover circle (re)appears so a stationary cursor can't
-// trigger it — see the `circleArmed` comment above.
-function disarmCircle() {
-  circleArmed = false;
-  armOriginX  = lastMouseX;
-  armOriginY  = lastMouseY;
-}
 
 document.addEventListener("keydown", e => {
   if (!trialActive || !spaceEnabled) return;
@@ -1256,10 +1237,43 @@ async function startExperiment() {
 
   phaseIndex = 0;
   trialIndex = 0;
-  disarmCircle();
+  preloadUpcoming(0, 0, PRELOAD_AHEAD + 1);
   showScreen("experiment");
   progressWrapper.style.display = "block";
   updateProgressBar();
+}
+
+
+// ══════════════════════════════════════════════
+//  PRELOADING
+//  Fires off background downloads for upcoming trials so they're already
+//  cached by the time the participant reaches them. A cold, uncached image
+//  load is what makes a stimulus visibly render in progressive chunks
+//  (see the display-timing fix in showStimulus() below) — prefetching a
+//  few trials ahead means that, in practice, almost every trial loads from
+//  cache instead of over the network.
+// ══════════════════════════════════════════════
+
+const PRELOAD_AHEAD = 2; // how many trials beyond the current one to keep pre-fetched
+const preloadedAssets = new Set();
+
+function preloadAsset(url) {
+  if (!url || preloadedAssets.has(url)) return;
+  preloadedAssets.add(url);
+  const img = new Image();
+  img.src = url;
+}
+
+function preloadUpcoming(fromPhaseIndex, fromTrialIndex, count) {
+  let pi = fromPhaseIndex, ti = fromTrialIndex, remaining = count;
+  while (pi < phases.length && remaining > 0) {
+    const trials = phases[pi].trials;
+    if (ti >= trials.length) { pi++; ti = 0; continue; }
+    preloadAsset(trials[ti].img);
+    preloadAsset(trials[ti].mask);
+    ti++;
+    remaining--;
+  }
 }
 
 
@@ -1268,7 +1282,6 @@ async function startExperiment() {
 // ══════════════════════════════════════════════
 
 startCircle.addEventListener("mouseenter", () => {
-  if (!circleArmed) return;
   startCircle.classList.add("active");
   hoverTimer = setTimeout(showStimulus, 1000);
 });
@@ -1303,13 +1316,21 @@ async function showStimulus() {
   maskCanvas.width   = 0;
 
   const trial = phases[phaseIndex].trials[trialIndex];
+  preloadUpcoming(phaseIndex, trialIndex + 1, PRELOAD_AHEAD);
 
-  // Load stimulus image
+  // Load stimulus image — kept hidden until it's fully downloaded and
+  // decoded, so the very first paint the participant sees is the complete
+  // image. Revealing it immediately (the old behavior) let the browser
+  // paint whatever had arrived so far on a cold/uncached load, which
+  // visibly rendered in sections and could let a participant glimpse part
+  // of the scene before the reaction-time clock starts.
   const stimulusLoaded = new Promise((resolve, reject) => {
     stimulus.onerror = () => reject(new Error("Stimulus failed to load"));
-    stimulus.onload  = resolve;
-    stimulus.src     = trial.img;
-    stimulus.style.display = "block";
+    stimulus.onload  = () => {
+      const decoded = stimulus.decode ? stimulus.decode().catch(() => {}) : Promise.resolve();
+      decoded.then(resolve);
+    };
+    stimulus.src = trial.img;
   });
 
   // Load mask (returns Promise; resolves immediately if no mask)
@@ -1321,6 +1342,8 @@ async function showStimulus() {
     console.warn("Asset load warning:", err);
     // Proceed anyway — centroid will be null and hits will fail gracefully
   }
+
+  stimulus.style.display = "block";
 
   // If a mask was expected but has no white pixels, treat as no-target at runtime.
   // Catches images placed in a target folder whose mask is completely empty.
@@ -1678,7 +1701,6 @@ function nextTrial() {
         progressWrapper.style.display = "block";
         updateProgressBar();
         instructionEl.style.display   = "block";
-        disarmCircle();
         startCircle.style.display     = "block";
       }, 100);
     });
@@ -1690,7 +1712,6 @@ function resumeAfterBreak() {
   progressWrapper.style.display = "block";
   updateProgressBar();
   instructionEl.style.display   = "block";
-  disarmCircle();
   startCircle.style.display     = "block";
 }
 
